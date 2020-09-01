@@ -9,6 +9,8 @@ import csv
 import config
 import util
 import pandas as pd
+import datetime
+import boto3
 
 def toS3():
     conn, cursor = util.connect2RDS()
@@ -41,12 +43,12 @@ def toS3():
     top_tracks = pd.DataFrame(top_tracks)
     top_tracks.to_parquet('top-tracks.parquet',engine='pyarrow',compression='snappy')
 
-    tracks_ids = [i['id'][0] for i in top_tracks]
+    track_ids = [top_tracks.loc[i,'id'] for i in top_tracks.index]
 
-    dt = datetime.utcnow().strftime("%Y-%m-%d")
+    dt = datetime.datetime.utcnow().strftime("%Y-%m-%d")
 
     s3 = boto3.resource('s3')
-    object = s3.Object('spotify-artists','top-tracks/dt={}/top-tracks.parquet'.format(dt))
+    object = s3.Object('kihong-spotify-lambda','top-tracks/dt={}/top-tracks.parquet'.format(dt))
     data = open('top-tracks.parquet','rb')
     object.put(Body=data)
 
@@ -60,12 +62,12 @@ def toS3():
         r = requests.get(URL,headers=headers)
         raw = json.loads(r.text)
 
-        audio.features.extend(raw['audio_features'])
+        audio_features.extend(raw['audio_features'])
 
     audio_features = pd.DataFrame(audio_features)
     audio_features.to_parquet('audio-features.parquet',engine='pyarrow',compression='snappy')
 
-    object = s3.Object('spotify-artists', 'audio-features/dt={}/top-tracks.parquet'.format(dt))
+    object = s3.Object('kihong-spotify-lambda', 'audio-features/dt={}/top-tracks.parquet'.format(dt))
     data = open('audio-features.parquet', 'rb')
     object.put(Body=data)
 
