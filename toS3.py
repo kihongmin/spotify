@@ -33,6 +33,7 @@ def toS3():
         }
         r = requests.get(URL, params = params, headers = headers)
         raw = json.loads(r.text)
+
         for i in raw['tracks']:
             top_track = {}
             for k, v in top_track_keys.items():
@@ -51,6 +52,11 @@ def toS3():
     object = s3.Object('kihong-spotify-lambda','top-tracks/dt={}/top-tracks.parquet'.format(dt))
     data = open('top-tracks.parquet','rb')
     object.put(Body=data)
+    ########################################################################################################
+    #
+    #
+    #
+    ########################################################################################################
 
     tracks_batch = [track_ids[i:i+100] for i in range(0,len(track_ids),100)]
 
@@ -67,7 +73,7 @@ def toS3():
     audio_features = pd.DataFrame(audio_features)
     audio_features.to_parquet('audio-features.parquet',engine='pyarrow',compression='snappy')
 
-    object = s3.Object('kihong-spotify-lambda', 'audio-features/dt={}/top-tracks.parquet'.format(dt))
+    object = s3.Object('kihong-spotify-lambda', 'audio-features/dt={}/audio-features.parquet'.format(dt))
     data = open('audio-features.parquet', 'rb')
     object.put(Body=data)
 

@@ -41,7 +41,7 @@ def insert_artists():
                         'image_url': artist_raw['images'][0]['url']
                     }
                 )
-                insert_row(cursor, artist, 'artists')
+                util.insert_row(cursor, artist, 'artists')
         except:
             logging.error('something worng')
             continue
@@ -81,7 +81,7 @@ def insert_artist_genres():
                 )
 
     for data in artist_genres:
-        insert_row(cursor, data, 'artist_genres')
+        util.insert_row(cursor, data, 'artist_genres')
 
     conn.commit()
     cursor.close()
