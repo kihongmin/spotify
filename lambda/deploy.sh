@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-#!/bin/bash
-
 rm -rf ./libs
 pip3 install -r requirements.txt -t ./libs
 

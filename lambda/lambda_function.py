@@ -81,7 +81,7 @@ def lambda_handler(event, context):
         bot.send_attachment(user_id, "template", payload)
         artist_id = cursor.execute("select id from artists where name='{}'".format(artist_name))
         artist_id = cursor.fetchall()[0][0]
-        #query = "SELECT t2.genre FROM artists t1 JOIN artist_genres t2 ON t2.artist_id = t1.id WHERE t1.name = '{}'".format(artist_name)
+
         query = '''
         SELECT y_artist
         FROM related_artists
@@ -94,15 +94,19 @@ def lambda_handler(event, context):
         neighbors = []
         for (neighbor, ) in cursor.fetchall():
             neighbors.append(neighbor)
-        URL = "https://api.spotify.com/v1/artists/?ids={}".format(','.join(neighbors))
+        if neighbors == []:
+            text = "sorry, we do not have related data about {}".format(artist_name)
+            bot.send_text(user_id, text)
+        else:
+            URL = "https://api.spotify.com/v1/artists/?ids={}".format(','.join(neighbors))
 
-        headers = get_headers(client_id,client_secret)
-        r = requests.get(URL, headers=headers)
-        raw = json.loads(r.text)
-        neighbors = list(map(lambda x: jsonpath.jsonpath(x,'name')[0],raw['artists']))
+            headers = get_headers(client_id,client_secret)
+            r = requests.get(URL, headers=headers)
+            raw = json.loads(r.text)
+            neighbors = list(map(lambda x: jsonpath.jsonpath(x,'name')[0],raw['artists']))
 
-        text = "Similar Artists : \n{}".format('\n'.join(neighbors))
-        bot.send_text(user_id, text)
+            text = "Similar Artists : \n{}".format('\n'.join(neighbors))
+            bot.send_text(user_id, text)
 
 def get_headers(client_id, client_secret):
 
