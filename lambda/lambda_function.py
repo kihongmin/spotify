@@ -9,6 +9,7 @@ import json
 import base64
 import boto3
 import config
+import jsonpath
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -34,7 +35,6 @@ except:
     sys.exit(1)
 
 bot = fb_bot.Bot(PAGE_TOKEN)
-
 
 def lambda_handler(event, context):
     # event['params'] only exists for HTTPS GET
@@ -79,26 +79,30 @@ def lambda_handler(event, context):
         }
 
         bot.send_attachment(user_id, "template", payload)
-
-        query = "SELECT t2.genre FROM artists t1 JOIN artist_genres t2 ON t2.artist_id = t1.id WHERE t1.name = '{}'".format(artist_name)
+        artist_id = cursor.execute("select id from artists where name='{}'".format(artist_name))
+        artist_id = cursor.fetchall()[0][0]
+        #query = "SELECT t2.genre FROM artists t1 JOIN artist_genres t2 ON t2.artist_id = t1.id WHERE t1.name = '{}'".format(artist_name)
+        query = '''
+        SELECT y_artist
+        FROM related_artists
+        WHERE artist_id='{}'
+        ORDER BY distance
+        limit 3
+        '''.format(artist_id)
 
         cursor.execute(query)
-        genres = []
-        for (genre, ) in cursor.fetchall():
-            genres.append(genre)
+        neighbors = []
+        for (neighbor, ) in cursor.fetchall():
+            neighbors.append(neighbor)
+        URL = "https://api.spotify.com/v1/artists/?ids={}".format(','.join(neighbors))
 
-        text = "Here are genres of {}".format(artist_name)
+        headers = get_headers(client_id,client_secret)
+        r = requests.get(URL, headers=headers)
+        raw = json.loads(r.text)
+        neighbors = list(map(lambda x: jsonpath.jsonpath(x,'name')[0],raw['artists']))
+
+        text = "Similar Artists : \n{}".format('\n'.join(neighbors))
         bot.send_text(user_id, text)
-        bot.send_text(user_id, ', '.join(genres))
-
-
-        ## 만약에 아티스트가 없을시에는 아티스트 추가
-
-        ## Spotify API hit --> Artist Search
-        ## Database Upload
-        ## One second
-        ## 오타 및 아티스트가 아닐 경우
-
 
 def get_headers(client_id, client_secret):
 

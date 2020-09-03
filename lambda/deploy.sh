@@ -7,7 +7,7 @@ rm -rf ./libs
 pip3 install -r requirements.txt -t ./libs
 
 rm *.zip
-zip top_tracks.zip -r *
+zip spotify.zip -r *
 
 aws s3 rm s3://kihong-spotify-lambda/spotify.zip
 aws s3 cp ./spotify.zip s3://kihong-spotify-lambda/spotify.zip

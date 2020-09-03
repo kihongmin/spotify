@@ -16,7 +16,7 @@ def toS3():
     conn, cursor = util.connect2RDS()
     headers = util.get_headers()
 
-    cursor.execute("SELECT id FROM artists LIMIT 10")
+    cursor.execute("SELECT id FROM artists")
 
     top_track_keys = {
         'id':'id',

@@ -3,3 +3,5 @@ __pycache__
 *.ipynb
 spotify.zip
 *.parquet
+libs
+top_tracks.zip

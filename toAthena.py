@@ -62,6 +62,8 @@ def main():
 
     for i in artists:
         for j in artists:
+            if i == j:
+                continue
             dist = 0
             for k in metrics:
                 x = float(i[k])
@@ -77,6 +79,7 @@ def main():
                 'y_artist': j['artist_id'],
                 'distance': dist
             }
+
 
             util.insert_row(cursor, data, 'related_artists')
 
