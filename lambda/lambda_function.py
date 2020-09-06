@@ -194,7 +194,7 @@ def search_artist(cursor, artist_name):
 
         insert_row(cursor, artist, 'artists')
         conn.commit()
-        r = invoke_lambda('top_tracks', payload={'artist_id': artist_raw['id']})
+        r = invoke_lambda('spotify-lambda', payload={'artist_id': artist_raw['id']})
         print(r)
 
         return "We added artist. Please try again in a second!"
